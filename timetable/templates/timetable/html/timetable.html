@@ -1,0 +1,224 @@
+
+{%  extends "timetable/html/wrapper.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <h1 align="center">SVO Airport Timetable</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-mg-3 col-sm-3 col-xs">
+                <button type="button" class="btn btn-block" onclick="showArrival()" style="width: 100%;">Arrival</button>
+            </div>
+            <div class="col-lg-3 col-mg-3 col-sm-3 col-xs">
+                <button type="button" class="btn btn-block" onclick="showDeparture()">Departure</button>
+            </div>
+            <div class="col-lg-3 col-mg-3 col-sm-3 col-xs">
+                <button type="button" class="btn btn-block" onclick="showCanceled()">Canceled</button>
+            </div>
+            <div class="col-lg-3 col-mg-3 col-sm-3 col-xs" >
+                <input class="form-control" id="input" type="text" placeholder="Search by flight number" onkeyup="searchByFlightNumber()">
+            </div>
+        </div>
+    <div class="row">
+    <div class="table-responsive text-nowrap">
+    <table id="table" class="table" style="display: none;">
+        <thead>
+            <tr>
+                <th>Departure time</th>
+                <th>Departure</th>
+                <th>Arrival time</th>
+                <th>Arrival</th>
+                <th>Airline</th>
+                <th>Flight number</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody" class="field">
+        </tbody>
+    </table>
+    </div>
+        </div>
+    </div>
+
+
+<script>
+            document.onreadystatechange = function () {
+                if (document.readyState === "complete") {
+                    let body = document.getElementById("tableBody");
+                    let data = {{ data|safe }};
+
+                    let arrival = '';
+                    let canceled = '';
+                    let departure = '';
+
+                    for (let i = 0; i < data.length; i++) {
+                        switch (data[i]['type']) {
+                            case 'arrival':
+                                if (data[i]['status'] !== 'cancelled') {
+                                    arrival += '<tr class="arr" style="display: none;" >';
+                                    arrival += '<td>' + data[i]['departure']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    arrival += '<td>' + data[i]['departure']['iataCode'] + '</td>';
+                                    arrival += '<td>' + data[i]['arrival']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    arrival += '<td>' + data[i]['arrival']['iataCode'] + '</td>';
+                                    arrival += '<td>' + data[i]['airline']['name'] + '</td>';
+                                    arrival += '<td>' + data[i]['flight']['iataNumber'] + '</td>';
+                                    arrival += '<td>' + data[i]['status'] + '</td>';
+                                    arrival += '</tr>'
+                                } else {
+                                    canceled += '<tr class="canc" style="display: none;" >';
+                                    canceled += '<td>' + data[i]['departure']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    canceled += '<td>' + data[i]['departure']['iataCode'] + '</td>';
+                                    canceled += '<td>' + data[i]['arrival']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    canceled += '<td>' + data[i]['arrival']['iataCode'] + '</td>';
+                                    canceled += '<td>' + data[i]['airline']['name'] + '</td>';
+                                    canceled += '<td>' + data[i]['flight']['iataNumber'] + '</td>';
+                                    canceled += '<td>' + data[i]['status'] + '</td>';
+                                    canceled += '</tr>'
+                                }
+                                break;
+                            case 'departure':
+                                if (data[i]['status'] !== 'cancelled') {
+                                    departure += '<tr class="dep" style="display: none;" >';
+                                    departure += '<td>' + data[i]['departure']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    departure += '<td>' + data[i]['departure']['iataCode'] + '</td>';
+                                    departure += '<td>' + data[i]['arrival']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    departure += '<td>' + data[i]['arrival']['iataCode'] + '</td>';
+                                    departure += '<td>' + data[i]['airline']['name'] + '</td>';
+                                    departure += '<td>' + data[i]['flight']['iataNumber'] + '</td>';
+                                    departure += '<td>' + data[i]['status'] + '</td>';
+                                    departure += '</tr>'
+                                } else {
+                                    canceled += '<tr class="canc" style="display: none;" >';
+                                    canceled += '<td>' + data[i]['departure']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    canceled += '<td>' + data[i]['departure']['iataCode'] + '</td>';
+                                    canceled += '<td>' + data[i]['arrival']['scheduledTime'].replace(/(T|:00\.000)/g, ' ') + '</td>';
+                                    canceled += '<td>' + data[i]['arrival']['iataCode'] + '</td>';
+                                    canceled += '<td>' + data[i]['airline']['name'] + '</td>';
+                                    canceled += '<td>' + data[i]['flight']['iataNumber'] + '</td>';
+                                    canceled += '<td>' + data[i]['status'] + '</td>';
+                                    canceled += '</tr>'
+                                }
+                                break;
+                        }
+                    }
+                    body.innerHTML = arrival + departure + canceled;
+                }
+            }
+
+    </script>
+
+
+<script>
+        function clean() {
+            let table = document.getElementById("table");
+            table.style.display = "none";
+
+            let canceled = document.getElementsByClassName("canc");
+            let arrival = document.getElementsByClassName("arr");
+            let departure = document.getElementsByClassName("dep");
+
+            for (let i = 0; i < canceled.length; i++) {
+                canceled[i].style.display = "none";
+            }
+
+            for (let i = 0; i < departure.length; i++) {
+                departure[i].style.display = "none";
+            }
+
+            for (let i = 0; i < arrival.length; i++) {
+                arrival[i].style.display = "none";
+            }
+        }
+        function showArrival() {
+            clean();
+
+            let table = document.getElementById("table");
+            table.style.display = (table.style.display === "none") ? '' : "none";
+
+            let canceled = document.getElementsByClassName("canc");
+            let arrival = document.getElementsByClassName("arr");
+            let departure = document.getElementsByClassName("dep");
+
+            for (let i = 0; i < canceled.length; i++) {
+                canceled[i].style.display = "none";
+            }
+
+            for (let i = 0; i < departure.length; i++) {
+                departure[i].style.display = "none";
+            }
+
+            for (let i = 0; i < arrival.length; i++) {
+                arrival[i].style.display = (arrival.item(i).style.display === "none") ? '' : "none";
+            }
+        }
+
+        function showDeparture() {
+            clean();
+
+            let table = document.getElementById("table");
+            table.style.display = (table.style.display === "none") ? '' : "none";
+
+            let canceled = document.getElementsByClassName("canc");
+            let arrival = document.getElementsByClassName("arr");
+            let departure = document.getElementsByClassName("dep");
+
+            for (let i = 0; i < canceled.length; i++) {
+                canceled[i].style.display = "none";
+            }
+
+            for (let i = 0; i < arrival.length; i++) {
+                arrival[i].style.display = "none";
+            }
+
+            for (let i = 0; i < departure.length; i++) {
+                departure[i].style.display = (departure.item(i).style.display === "none") ? '' : "none";
+            }
+        }
+
+        function showCanceled() {
+            clean();
+
+            let table = document.getElementById("table");
+            table.style.display = (table.style.display === "none") ? '' : "none";
+
+            let canceled = document.getElementsByClassName("canc");
+            let arrival = document.getElementsByClassName("arr");
+            let departure = document.getElementsByClassName("dep");
+
+            for (let i = 0; i < arrival.length; i++) {
+                arrival[i].style.display = "none";
+            }
+
+            for (let i = 0; i < departure.length; i++) {
+                departure[i].style.display = "none";
+            }
+
+            for (let i = 0; i < canceled.length; i++) {
+                canceled[i].style.display = (canceled.item(i).style.display === "none") ? '' : "none"
+            }
+        }
+
+        function searchByFlightNumber() {
+
+            let input = document.getElementById("input").value;
+            console.log(input);
+            let table = document.getElementById("table");
+            table.style.display = "";
+            let rows = table.getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let td = rows[i].getElementsByTagName("td")[5];
+                if (td) {
+                    let textValue = td.textContent || td.innerText;
+                    if (textValue.toUpperCase().indexOf(input) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+
+            }
+
+        }
+    </script>
+{%  endblock %}
